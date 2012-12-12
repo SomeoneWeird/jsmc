@@ -1,4 +1,5 @@
-var Player = require("../lib/player.js");
+var Player = require("../lib/player.js"),
+    fs = require('fs');
 
 module.exports = function() {
   return function(game) {
@@ -21,7 +22,28 @@ module.exports = function() {
             return;
           }
 
-          var player = new Player(game, {client: client, name: packet.username, x: 0, y: y, z: 0, stance: y + 1.62, yaw: 0, pitch: 0});
+          var playerData = {
+            client: client,
+            name: packet.username,
+            x: 0,
+            z: 0,
+            y: y,
+            stance: y + 1.62,
+            yaw: 0,
+            pitch: 0
+          };
+
+          if(fs.existsSync('./players/' + packet.username + ".json")) {
+
+            var data = JSON.parse(fs.readFileSync('./players/' + packet.username + ".json"));
+
+            if (typeof data.x      === "number")  { playerData.x      = data.x;     }
+            if (typeof data.z      === "number")  { playerData.z      = data.z;     }
+            if (typeof data.y      === "number")  { playerData.y      = data.y;     playerData.stance = playerData.y + 1.62; };
+
+          }
+
+          var player = new Player(game, playerData);
 
           if(~game.admins.indexOf(packet.username))
             player.admin = true;
